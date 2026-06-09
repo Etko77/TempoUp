@@ -6,6 +6,7 @@ import com.tempoup.api.chat.dto.SendMessageRequest;
 import com.tempoup.api.common.security.CurrentUser;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -34,8 +35,13 @@ public class ConversationController {
     }
 
     @PostMapping("/{conversationId}/messages")
-    public MessageResponse send(@PathVariable UUID conversationId,
-                                @Valid @RequestBody SendMessageRequest req) {
+    public MessageResponse sendMessageInChat(@PathVariable UUID conversationId,
+                                             @Valid @RequestBody SendMessageRequest req) {
         return chat.sendMessage(CurrentUser.id(), conversationId, req);
+    }
+    @PostMapping("/{conversationId}/read")
+    public ResponseEntity<Void> markRead(@PathVariable UUID conversationId){
+        chat.markAsRead(conversationId, CurrentUser.id());
+        return ResponseEntity.noContent().build();
     }
 }

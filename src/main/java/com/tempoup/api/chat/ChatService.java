@@ -13,6 +13,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -48,6 +49,15 @@ public class ChatService {
         Conversation convo = loadAndAuthorize(userId, conversationId);
         return messages.findByConversationIdOrderByCreatedAtDesc(convo.getId(), PageRequest.of(page, size))
                 .map(this::toMessageResponse);
+    }
+
+    @Transactional
+    public void markAsRead(UUID conversationId, UUID currentUserId){
+        messages.markConversationMessageAsRead(
+                conversationId,
+                currentUserId,
+                Instant.now()
+        );
     }
 
     @Transactional

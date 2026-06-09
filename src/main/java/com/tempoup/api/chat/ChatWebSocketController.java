@@ -16,7 +16,7 @@ import java.util.UUID;
 /**
  * STOMP entry point for chat.
  *
- * Client sends to:   /app/conversations/{conversationId}/send
+ * Client sends to:   /app/conversations/{conversationId}/sendMessageInChat
  * Server pushes to:  /user/{otherUserId}/queue/messages   (the recipient)
  *               and: /user/{senderId}/queue/messages       (echo to sender)
  *
@@ -36,7 +36,7 @@ public class ChatWebSocketController {
         this.messaging = messaging;
     }
 
-    @MessageMapping("/conversations/{conversationId}/send")
+    @MessageMapping("/conversations/{conversationId}/sendMessageInChat")
     public void send(@DestinationVariable UUID conversationId,
                      @Payload SendMessageRequest req,
                      Principal principal) {

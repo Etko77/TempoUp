@@ -3,7 +3,7 @@ spring:
     name: tempoup-api
 
   datasource:
-    url: ${DB_URL:jdbc:postgresql://localhost:5432/tempoup}
+    url: ${DB_URL:jdbc:postgresql://localhost:5433/tempoup}
     username: ${DB_USERNAME:tempoup}
     password: ${DB_PASSWORD:tempoup}
 
