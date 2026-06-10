@@ -1,0 +1,19 @@
+# Spins up PostgreSQL with the PostGIS extension for local development.
+# Usage:  docker compose up -d
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    container_name: tempoup-db
+    environment:
+      POSTGRES_DB: tempoup
+      POSTGRES_USER: tempoup
+      POSTGRES_PASSWORD: tempoup
+    # Host port 5433 (5432 is used by a native PostgreSQL install on this machine).
+    # Connect the app with DB_URL=jdbc:postgresql://localhost:5433/tempoup
+    ports:
+      - "5433:5432"
+    volumes:
+      - tempoup_pgdata:/var/lib/postgresql/data
+
+volumes:
+  tempoup_pgdata:

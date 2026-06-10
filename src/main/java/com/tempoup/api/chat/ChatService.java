@@ -2,6 +2,7 @@ package com.tempoup.api.chat;
 
 import com.tempoup.api.chat.dto.ConversationResponse;
 import com.tempoup.api.chat.dto.MessageResponse;
+import com.tempoup.api.chat.dto.ReadReceipt;
 import com.tempoup.api.chat.dto.SendMessageRequest;
 import com.tempoup.api.common.exception.ApiException;
 import com.tempoup.api.matching.Match;
@@ -10,10 +11,10 @@ import com.tempoup.api.profile.Profile;
 import com.tempoup.api.profile.ProfileRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -25,13 +26,16 @@ public class ChatService {
     private final MessageRepository messages;
     private final MatchRepository matches;
     private final ProfileRepository profiles;
+    private final SimpMessagingTemplate messaging;
 
     public ChatService(ConversationRepository conversations, MessageRepository messages,
-                       MatchRepository matches, ProfileRepository profiles) {
+                       MatchRepository matches, ProfileRepository profiles,
+                       SimpMessagingTemplate messaging) {
         this.conversations = conversations;
         this.messages = messages;
         this.matches = matches;
         this.profiles = profiles;
+        this.messaging = messaging;
     }
 
     @Transactional(readOnly = true)
@@ -53,11 +57,18 @@ public class ChatService {
 
     @Transactional
     public void markAsRead(UUID conversationId, UUID currentUserId){
-        messages.markConversationMessageAsRead(
-                conversationId,
-                currentUserId,
-                Instant.now()
-        );
+        Conversation convo = loadAndAuthorize(currentUserId, conversationId);
+        OffsetDateTime now = OffsetDateTime.now();
+        int updated = messages.markConversationMessageAsRead(conversationId, currentUserId, now);
+        if (updated == 0) return;
+
+        // Tell the original sender (the other participant) so their UI can show "Read".
+        Match match = matches.findById(convo.getMatchId())
+                .orElseThrow(() -> ApiException.notFound("Match not found"));
+        UUID senderId = match.getUserAId().equals(currentUserId)
+                ? match.getUserBId() : match.getUserAId();
+        messaging.convertAndSendToUser(senderId.toString(), "/queue/read",
+                new ReadReceipt(conversationId, currentUserId, now));
     }
 
     @Transactional

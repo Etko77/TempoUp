@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 public interface MessageRepository extends JpaRepository<Message, UUID> {
@@ -24,6 +24,6 @@ public interface MessageRepository extends JpaRepository<Message, UUID> {
     int markConversationMessageAsRead(
             @Param("conversationId") UUID conversationId,
             @Param("currentUserId") UUID currentUserId,
-            @Param("readAt") Instant readAt
+            @Param("readAt") OffsetDateTime readAt
      );
 }
