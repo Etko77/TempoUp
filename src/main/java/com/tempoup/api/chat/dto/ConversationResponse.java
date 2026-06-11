@@ -8,5 +8,6 @@ public record ConversationResponse(
         UUID matchId,
         UUID otherUserId,
         String otherDisplayName,
-        OffsetDateTime lastMessageAt
+        OffsetDateTime lastMessageAt,
+        long unreadCount
 ) {}

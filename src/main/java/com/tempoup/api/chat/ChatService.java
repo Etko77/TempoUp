@@ -62,7 +62,6 @@ public class ChatService {
         int updated = messages.markConversationMessageAsRead(conversationId, currentUserId, now);
         if (updated == 0) return;
 
-        // Tell the original sender (the other participant) so their UI can show "Read".
         Match match = matches.findById(convo.getMatchId())
                 .orElseThrow(() -> ApiException.notFound("Match not found"));
         UUID senderId = match.getUserAId().equals(currentUserId)
@@ -84,7 +83,6 @@ public class ChatService {
         return toMessageResponse(saved);
     }
 
-    /** Confirms the conversation exists and the user is one of its two participants. */
     public Conversation loadAndAuthorize(UUID userId, UUID conversationId) {
         Conversation convo = conversations.findById(conversationId)
                 .orElseThrow(() -> ApiException.notFound("Conversation not found"));
@@ -99,7 +97,8 @@ public class ChatService {
     private ConversationResponse toConversationResponse(UUID userId, Match m, Conversation c) {
         UUID other = m.getUserAId().equals(userId) ? m.getUserBId() : m.getUserAId();
         String name = profiles.findByUserId(other).map(Profile::getDisplayName).orElse("Unknown");
-        return new ConversationResponse(c.getId(), m.getId(), other, name, c.getLastMessageAt());
+        long unread = messages.countByConversationIdAndSenderIdNotAndReadAtIsNull(c.getId(), userId);
+        return new ConversationResponse(c.getId(), m.getId(), other, name, c.getLastMessageAt(), unread);
     }
 
     private MessageResponse toMessageResponse(Message m) {
