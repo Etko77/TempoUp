@@ -1,5 +1,6 @@
 package com.tempoup.api.matching.dto;
 
+import java.util.List;
 import java.util.UUID;
 
 public record DiscoveryCandidate(
@@ -11,5 +12,6 @@ public record DiscoveryCandidate(
         Double distanceKm,
         int sharedSports,
         int sharedSkills,
+        List<String> sharedSportNames,
         int score
 ) {}

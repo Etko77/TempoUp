@@ -5,6 +5,7 @@ import com.tempoup.api.matching.dto.DiscoveryCandidate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/discovery")
@@ -16,10 +17,16 @@ public class DiscoveryController {
         this.matching = matching;
     }
 
-    /** The swipe feed, ordered by match score then proximity. */
     @GetMapping
     public List<DiscoveryCandidate> feed(@RequestParam(required = false) Double radiusKm,
                                          @RequestParam(required = false) Integer limit) {
         return matching.feed(CurrentUser.id(), radiusKm, limit);
+    }
+
+    @GetMapping("/by-sport/{sportId}")
+    public List<DiscoveryCandidate> feedBySport(@PathVariable UUID sportId,
+                                                @RequestParam(required = false) Double radiusKm,
+                                                @RequestParam(required = false) Integer limit) {
+        return matching.feedBySport(CurrentUser.id(), sportId, radiusKm, limit);
     }
 }

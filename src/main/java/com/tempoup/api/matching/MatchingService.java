@@ -10,6 +10,7 @@ import com.tempoup.api.profile.ProfileRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -45,14 +46,26 @@ public class MatchingService {
                         r.getDistanceKm(),
                         r.getSharedSports() == null ? 0 : r.getSharedSports(),
                         r.getSharedSkills() == null ? 0 : r.getSharedSkills(),
+                        splitNames(r.getSharedSportNames()),
                         r.getScore() == null ? 0 : r.getScore()))
                 .toList();
     }
 
-    /**
-     * Record a swipe. If it is a LIKE and the target already liked the swiper,
-     * a Match (and its Conversation) is created atomically.
-     */
+    @Transactional(readOnly = true)
+    public List<DiscoveryCandidate> feedBySport(UUID userId, UUID sportId, Double radiusKm, Integer limit) {
+        double radiusMeters = (radiusKm != null ? radiusKm : props.matching().defaultRadiusKm()) * 1000.0;
+        int max = limit != null ? Math.min(limit, props.matching().maxFeedSize()) : props.matching().maxFeedSize();
+        return discovery.findFeedBySport(userId, sportId, radiusMeters, max).stream()
+                .map(r -> new DiscoveryCandidate(
+                        r.getUserId(), r.getDisplayName(), r.getBio(), r.getCity(), r.getPhotoUrl(),
+                        r.getDistanceKm(),
+                        r.getSharedSports() == null ? 0 : r.getSharedSports(),
+                        r.getSharedSkills() == null ? 0 : r.getSharedSkills(),
+                        splitNames(r.getSharedSportNames()),
+                        r.getScore() == null ? 0 : r.getScore()))
+                .toList();
+    }
+
     @Transactional
     public SwipeResult swipe(UUID swiperId, SwipeRequest req) {
         UUID targetId = req.targetUserId();
@@ -62,8 +75,18 @@ public class MatchingService {
         if (profiles.findByUserId(targetId).isEmpty()) {
             throw ApiException.notFound("Target user not found");
         }
-        if (swipes.existsBySwiperIdAndSwipedId(swiperId, targetId)) {
-            throw ApiException.conflict("You have already swiped on this user");
+
+        Optional<Swipe> existing = swipes.findBySwiperIdAndSwipedId(swiperId, targetId);
+        if (existing.isPresent()) {
+            Swipe prev = existing.get();
+            boolean expiredPass = prev.getDirection() == SwipeDirection.PASS
+                    && prev.getCreatedAt() != null
+                    && prev.getCreatedAt().isBefore(OffsetDateTime.now().minusHours(1));
+            if (!expiredPass) {
+                throw ApiException.conflict("You have already swiped on this user");
+            }
+            swipes.delete(prev);
+            swipes.flush();
         }
 
         swipes.save(Swipe.builder()
@@ -81,6 +104,11 @@ public class MatchingService {
             return new SwipeResult(true, match.getId(), convo.getId());
         }
         return new SwipeResult(false, null, null);
+    }
+
+    private static List<String> splitNames(String aggregated) {
+        if (aggregated == null || aggregated.isBlank()) return List.of();
+        return List.of(aggregated.split(", "));
     }
 
     @Transactional(readOnly = true)
