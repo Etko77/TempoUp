@@ -40,6 +40,9 @@ public class SuggestionService {
                 .parentSportId(req.type() == SuggestionType.SKILL ? req.parentSportId() : null)
                 .name(req.name().trim())
                 .description(req.description())
+                .metricType(req.type() == SuggestionType.SKILL
+                        ? (req.metricType() != null ? req.metricType() : MetricType.NONE)
+                        : null)
                 .status(SuggestionStatus.PENDING)
                 .suggestedBy(userId)
                 .build());
@@ -58,10 +61,6 @@ public class SuggestionService {
                 .map(this::toResponse).toList();
     }
 
-    /**
-     * Approve a suggestion: this is where a pending suggestion becomes a real
-     * Sport or Skill row. Idempotency guard: re-approving a non-pending row fails.
-     */
     @Transactional
     public SuggestionResponse approve(UUID adminId, UUID suggestionId, ReviewSuggestionRequest req) {
         SportSuggestion s = load(suggestionId);
@@ -77,7 +76,7 @@ public class SuggestionService {
                     .active(true)
                     .createdBy(s.getSuggestedBy())
                     .build());
-        } else { // SKILL
+        } else {
             UUID sportId = s.getParentSportId();
             if (sportId == null || !sports.existsById(sportId)) {
                 throw ApiException.badRequest("Parent sport no longer exists");
@@ -89,6 +88,7 @@ public class SuggestionService {
                     .sportId(sportId)
                     .name(s.getName())
                     .description(s.getDescription())
+                    .metricType(s.getMetricType() != null ? s.getMetricType() : MetricType.NONE)
                     .active(true)
                     .createdBy(s.getSuggestedBy())
                     .build());
@@ -125,7 +125,7 @@ public class SuggestionService {
 
     private SuggestionResponse toResponse(SportSuggestion s) {
         return new SuggestionResponse(s.getId(), s.getType(), s.getParentSportId(),
-                s.getName(), s.getDescription(), s.getStatus(), s.getReviewNote(),
+                s.getName(), s.getDescription(), s.getMetricType(), s.getStatus(), s.getReviewNote(),
                 s.getCreatedAt(), s.getReviewedAt());
     }
 }

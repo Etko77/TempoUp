@@ -33,7 +33,7 @@ public class SportService {
             throw ApiException.notFound("Sport not found");
         }
         return skills.findBySportIdAndActiveTrueOrderByName(sportId).stream()
-                .map(sk -> new SkillResponse(sk.getId(), sk.getSportId(), sk.getName(), sk.getDescription()))
+                .map(sk -> new SkillResponse(sk.getId(), sk.getSportId(), sk.getName(), sk.getDescription(), sk.getMetricType()))
                 .toList();
     }
 }

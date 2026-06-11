@@ -25,6 +25,11 @@ public class Skill {
     @Column(columnDefinition = "text")
     private String description;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "metric_type", nullable = false)
+    @Builder.Default
+    private MetricType metricType = MetricType.NONE;
+
     @Column(name = "is_active", nullable = false)
     @Builder.Default
     private boolean active = true;

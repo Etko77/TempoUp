@@ -1,6 +1,7 @@
 package com.tempoup.api.sport.dto;
 
 import com.tempoup.api.sport.ProficiencyLevel;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
@@ -10,5 +11,15 @@ public record SetUserSportRequest(
         @NotNull UUID sportId,
         @NotNull ProficiencyLevel proficiencyLevel,
         boolean priority,
-        List<UUID> skillIds
-) {}
+        @Valid List<SkillSelection> skills
+) {
+    public record SkillSelection(
+            @NotNull UUID skillId,
+            Double weightKg,
+            Integer reps,
+            Double distanceKm,
+            Integer durationSeconds,
+            Double speedKmh,
+            boolean starred
+    ) {}
+}

@@ -19,4 +19,23 @@ public class UserSkill {
 
     @Column(name = "skill_id", nullable = false)
     private UUID skillId;
+
+    @Column(name = "weight_kg")
+    private Double weightKg;
+
+    @Column(name = "reps")
+    private Integer reps;
+
+    @Column(name = "distance_km")
+    private Double distanceKm;
+
+    @Column(name = "duration_seconds")
+    private Integer durationSeconds;
+
+    @Column(name = "speed_kmh")
+    private Double speedKmh;
+
+    @Column(name = "is_starred", nullable = false)
+    @Builder.Default
+    private boolean starred = false;
 }

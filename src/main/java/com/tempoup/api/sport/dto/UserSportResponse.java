@@ -10,5 +10,5 @@ public record UserSportResponse(
         String sportName,
         ProficiencyLevel proficiencyLevel,
         boolean priority,
-        List<SkillResponse> skills
+        List<UserSkillResponse> skills
 ) {}

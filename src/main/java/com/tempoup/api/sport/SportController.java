@@ -25,7 +25,6 @@ public class SportController {
         this.suggestions = suggestions;
     }
 
-    // Public catalog -----------------------------------------------------
     @GetMapping
     public List<SportResponse> listSports() {
         return sportService.listSports();
@@ -36,7 +35,6 @@ public class SportController {
         return sportService.listSkills(sportId);
     }
 
-    // Current user's selected sports -------------------------------------
     @GetMapping("/mine")
     public List<UserSportResponse> mySports() {
         return userSports.listForUser(CurrentUser.id());
@@ -53,7 +51,11 @@ public class SportController {
         return ResponseEntity.noContent().build();
     }
 
-    // Suggestions (user-facing) ------------------------------------------
+    @GetMapping("/by-user/{userId}")
+    public List<UserSportResponse> sportsByUser(@PathVariable UUID userId) {
+        return userSports.listForUser(userId);
+    }
+
     @PostMapping("/suggestions")
     public ResponseEntity<SuggestionResponse> suggest(@Valid @RequestBody CreateSuggestionRequest req) {
         return ResponseEntity.status(HttpStatus.CREATED)

@@ -1,5 +1,6 @@
 package com.tempoup.api.sport.dto;
 
+import com.tempoup.api.sport.MetricType;
 import com.tempoup.api.sport.SuggestionStatus;
 import com.tempoup.api.sport.SuggestionType;
 
@@ -12,6 +13,7 @@ public record SuggestionResponse(
         UUID parentSportId,
         String name,
         String description,
+        MetricType metricType,
         SuggestionStatus status,
         String reviewNote,
         OffsetDateTime createdAt,

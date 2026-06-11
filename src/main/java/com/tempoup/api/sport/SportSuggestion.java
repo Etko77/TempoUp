@@ -20,7 +20,6 @@ public class SportSuggestion {
     @Column(nullable = false)
     private SuggestionType type;
 
-    /** Null when suggesting a brand-new sport; set when suggesting a skill under a sport. */
     @Column(name = "parent_sport_id")
     private UUID parentSportId;
 
@@ -29,6 +28,10 @@ public class SportSuggestion {
 
     @Column(columnDefinition = "text")
     private String description;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "metric_type")
+    private MetricType metricType;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
