@@ -21,6 +21,10 @@ spring:
   flyway:
     enabled: true
     baseline-on-migrate: true
+    # Baseline BELOW V1 so a fresh/empty database still runs V1__init_schema.
+    # (With the default baseline version of 1, Flyway treats V1 as already
+    #  applied on an empty DB and skips creating the tables.)
+    baseline-version: 0
     locations: classpath:db/migration
 
 server:
