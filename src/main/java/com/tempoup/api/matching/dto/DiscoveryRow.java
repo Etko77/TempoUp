@@ -8,7 +8,6 @@ public interface DiscoveryRow {
     String getCity();
     String getBio();
     String getPhotoUrl();
-    Double getDistanceKm();
     Integer getSharedSports();
     Integer getSharedPrioritySports();
     Integer getSharedSkills();

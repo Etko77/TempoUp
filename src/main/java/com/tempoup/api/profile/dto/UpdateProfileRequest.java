@@ -11,7 +11,5 @@ public record UpdateProfileRequest(
         LocalDate dateOfBirth,
         Gender gender,
         @Size(max = 512) String photoUrl,
-        @Size(max = 120) String city,
-        Double latitude,
-        Double longitude
+        @Size(max = 120) String city
 ) {}

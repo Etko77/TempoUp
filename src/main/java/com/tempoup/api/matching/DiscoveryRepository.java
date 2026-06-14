@@ -12,12 +12,7 @@ import java.util.UUID;
 public interface DiscoveryRepository extends Repository<Profile, UUID> {
 
     @Query(value = """
-        WITH me AS (
-            SELECT p.user_id, p.location
-            FROM profiles p
-            WHERE p.user_id = :userId
-        ),
-        my_sports AS (
+        WITH my_sports AS (
             SELECT us.sport_id, bool_or(us.is_priority) AS my_priority
             FROM user_sports us
             WHERE us.user_id = :userId
@@ -35,11 +30,6 @@ public interface DiscoveryRepository extends Repository<Profile, UUID> {
             cand.city                                                 AS city,
             cand.bio                                                  AS bio,
             cand.photo_url                                            AS photo_url,
-            CASE
-                WHEN me.location IS NOT NULL AND cand.location IS NOT NULL
-                THEN ST_Distance(me.location, cand.location) / 1000.0
-                ELSE NULL
-            END                                                       AS distance_km,
             COALESCE(shared.shared_sports, 0)                         AS shared_sports,
             COALESCE(shared.shared_priority_sports, 0)                AS shared_priority_sports,
             COALESCE(sk.shared_skills, 0)                             AS shared_skills,
@@ -49,7 +39,6 @@ public interface DiscoveryRepository extends Repository<Profile, UUID> {
              + COALESCE(sk.shared_skills, 0) * 2)                     AS score
         FROM profiles cand
         JOIN users u ON u.id = cand.user_id AND u.enabled = TRUE
-        CROSS JOIN me
         LEFT JOIN (
             SELECT us.user_id,
                    COUNT(*) AS shared_sports,
@@ -73,25 +62,14 @@ public interface DiscoveryRepository extends Repository<Profile, UUID> {
               WHERE s.swiper_id = :userId AND s.swiped_id = cand.user_id
                 AND (s.direction = 'LIKE' OR s.created_at > now() - interval '1 hour')
           )
-          AND (
-              me.location IS NULL
-              OR cand.location IS NULL
-              OR ST_DWithin(me.location, cand.location, :radiusMeters)
-          )
-        ORDER BY shared_sports DESC, shared_skills DESC, distance_km ASC NULLS LAST, cand.created_at DESC
+        ORDER BY shared_sports DESC, shared_skills DESC, cand.created_at DESC
         LIMIT :limit
         """, nativeQuery = true)
     List<DiscoveryRow> findFeed(@Param("userId") UUID userId,
-                                @Param("radiusMeters") double radiusMeters,
                                 @Param("limit") int limit);
 
     @Query(value = """
-        WITH me AS (
-            SELECT p.user_id, p.location
-            FROM profiles p
-            WHERE p.user_id = :userId
-        ),
-        my_sports AS (
+        WITH my_sports AS (
             SELECT us.sport_id, bool_or(us.is_priority) AS my_priority
             FROM user_sports us
             WHERE us.user_id = :userId
@@ -109,11 +87,6 @@ public interface DiscoveryRepository extends Repository<Profile, UUID> {
             cand.city                                                 AS city,
             cand.bio                                                  AS bio,
             cand.photo_url                                            AS photo_url,
-            CASE
-                WHEN me.location IS NOT NULL AND cand.location IS NOT NULL
-                THEN ST_Distance(me.location, cand.location) / 1000.0
-                ELSE NULL
-            END                                                       AS distance_km,
             COALESCE(shared.shared_sports, 0)                         AS shared_sports,
             COALESCE(shared.shared_priority_sports, 0)                AS shared_priority_sports,
             COALESCE(sk.shared_skills, 0)                             AS shared_skills,
@@ -122,7 +95,6 @@ public interface DiscoveryRepository extends Repository<Profile, UUID> {
              + COALESCE(shared.shared_sports, 0))                     AS score
         FROM profiles cand
         JOIN users u ON u.id = cand.user_id AND u.enabled = TRUE
-        CROSS JOIN me
         JOIN user_sports cand_sport
              ON cand_sport.user_id = cand.user_id AND cand_sport.sport_id = :sportId
         LEFT JOIN (
@@ -149,16 +121,10 @@ public interface DiscoveryRepository extends Repository<Profile, UUID> {
               WHERE s.swiper_id = :userId AND s.swiped_id = cand.user_id
                 AND (s.direction = 'LIKE' OR s.created_at > now() - interval '1 hour')
           )
-          AND (
-              me.location IS NULL
-              OR cand.location IS NULL
-              OR ST_DWithin(me.location, cand.location, :radiusMeters)
-          )
-        ORDER BY shared_skills DESC, shared_sports DESC, distance_km ASC NULLS LAST, cand.created_at DESC
+        ORDER BY shared_skills DESC, shared_sports DESC, cand.created_at DESC
         LIMIT :limit
         """, nativeQuery = true)
     List<DiscoveryRow> findFeedBySport(@Param("userId") UUID userId,
                                        @Param("sportId") UUID sportId,
-                                       @Param("radiusMeters") double radiusMeters,
                                        @Param("limit") int limit);
 }

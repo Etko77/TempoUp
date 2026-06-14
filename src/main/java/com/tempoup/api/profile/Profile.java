@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-import org.locationtech.jts.geom.Point;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
@@ -38,13 +37,6 @@ public class Profile {
     private String photoUrl;
 
     private String city;
-
-    /**
-     * PostGIS geography point (lon, lat) in SRID 4326.
-     * Hibernate-spatial maps a JTS Point to the geography column.
-     */
-    @Column(columnDefinition = "geography(Point,4326)")
-    private Point location;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)

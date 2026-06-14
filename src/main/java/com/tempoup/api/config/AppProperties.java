@@ -9,5 +9,5 @@ public record AppProperties(Jwt jwt, Cors cors, Matching matching) {
 
     public record Jwt(String secret, long accessTokenTtlMinutes, long refreshTokenTtlDays) {}
     public record Cors(List<String> allowedOrigins) {}
-    public record Matching(double defaultRadiusKm, int maxFeedSize) {}
+    public record Matching(int maxFeedSize) {}
 }

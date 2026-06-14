@@ -12,7 +12,5 @@ public record ProfileResponse(
         LocalDate dateOfBirth,
         Gender gender,
         String photoUrl,
-        String city,
-        Double latitude,
-        Double longitude
+        String city
 ) {}

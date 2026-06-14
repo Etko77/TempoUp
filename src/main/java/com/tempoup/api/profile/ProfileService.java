@@ -3,10 +3,6 @@ package com.tempoup.api.profile;
 import com.tempoup.api.common.exception.ApiException;
 import com.tempoup.api.profile.dto.ProfileResponse;
 import com.tempoup.api.profile.dto.UpdateProfileRequest;
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.GeometryFactory;
-import org.locationtech.jts.geom.Point;
-import org.locationtech.jts.geom.PrecisionModel;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,10 +10,6 @@ import java.util.UUID;
 
 @Service
 public class ProfileService {
-
-    // SRID 4326 = WGS84 (GPS lat/lng)
-    private static final GeometryFactory GEO =
-            new GeometryFactory(new PrecisionModel(), 4326);
 
     private final ProfileRepository profiles;
 
@@ -39,12 +31,6 @@ public class ProfileService {
         if (req.gender() != null)      p.setGender(req.gender());
         if (req.photoUrl() != null)    p.setPhotoUrl(req.photoUrl());
         if (req.city() != null)        p.setCity(req.city());
-        if (req.latitude() != null && req.longitude() != null) {
-            // Point uses (x=lon, y=lat) ordering.
-            Point point = GEO.createPoint(new Coordinate(req.longitude(), req.latitude()));
-            point.setSRID(4326);
-            p.setLocation(point);
-        }
         return toResponse(profiles.save(p));
     }
 
@@ -54,13 +40,8 @@ public class ProfileService {
     }
 
     private ProfileResponse toResponse(Profile p) {
-        Double lat = null, lon = null;
-        if (p.getLocation() != null) {
-            lat = p.getLocation().getY();
-            lon = p.getLocation().getX();
-        }
         return new ProfileResponse(
                 p.getUserId(), p.getDisplayName(), p.getBio(), p.getDateOfBirth(),
-                p.getGender(), p.getPhotoUrl(), p.getCity(), lat, lon);
+                p.getGender(), p.getPhotoUrl(), p.getCity());
     }
 }

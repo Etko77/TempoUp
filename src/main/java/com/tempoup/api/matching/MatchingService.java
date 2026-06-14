@@ -37,13 +37,11 @@ public class MatchingService {
     }
 
     @Transactional(readOnly = true)
-    public List<DiscoveryCandidate> feed(UUID userId, Double radiusKm, Integer limit) {
-        double radiusMeters = (radiusKm != null ? radiusKm : props.matching().defaultRadiusKm()) * 1000.0;
+    public List<DiscoveryCandidate> feed(UUID userId, Integer limit) {
         int max = limit != null ? Math.min(limit, props.matching().maxFeedSize()) : props.matching().maxFeedSize();
-        return discovery.findFeed(userId, radiusMeters, max).stream()
+        return discovery.findFeed(userId, max).stream()
                 .map(r -> new DiscoveryCandidate(
                         r.getUserId(), r.getDisplayName(), r.getBio(), r.getCity(), r.getPhotoUrl(),
-                        r.getDistanceKm(),
                         r.getSharedSports() == null ? 0 : r.getSharedSports(),
                         r.getSharedSkills() == null ? 0 : r.getSharedSkills(),
                         splitNames(r.getSharedSportNames()),
@@ -52,13 +50,11 @@ public class MatchingService {
     }
 
     @Transactional(readOnly = true)
-    public List<DiscoveryCandidate> feedBySport(UUID userId, UUID sportId, Double radiusKm, Integer limit) {
-        double radiusMeters = (radiusKm != null ? radiusKm : props.matching().defaultRadiusKm()) * 1000.0;
+    public List<DiscoveryCandidate> feedBySport(UUID userId, UUID sportId, Integer limit) {
         int max = limit != null ? Math.min(limit, props.matching().maxFeedSize()) : props.matching().maxFeedSize();
-        return discovery.findFeedBySport(userId, sportId, radiusMeters, max).stream()
+        return discovery.findFeedBySport(userId, sportId, max).stream()
                 .map(r -> new DiscoveryCandidate(
                         r.getUserId(), r.getDisplayName(), r.getBio(), r.getCity(), r.getPhotoUrl(),
-                        r.getDistanceKm(),
                         r.getSharedSports() == null ? 0 : r.getSharedSports(),
                         r.getSharedSkills() == null ? 0 : r.getSharedSkills(),
                         splitNames(r.getSharedSportNames()),

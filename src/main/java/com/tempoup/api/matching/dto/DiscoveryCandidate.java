@@ -9,7 +9,6 @@ public record DiscoveryCandidate(
         String bio,
         String city,
         String photoUrl,
-        Double distanceKm,
         int sharedSports,
         int sharedSkills,
         List<String> sharedSportNames,

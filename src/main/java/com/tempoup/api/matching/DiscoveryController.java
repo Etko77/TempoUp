@@ -18,15 +18,13 @@ public class DiscoveryController {
     }
 
     @GetMapping
-    public List<DiscoveryCandidate> feed(@RequestParam(required = false) Double radiusKm,
-                                         @RequestParam(required = false) Integer limit) {
-        return matching.feed(CurrentUser.id(), radiusKm, limit);
+    public List<DiscoveryCandidate> feed(@RequestParam(required = false) Integer limit) {
+        return matching.feed(CurrentUser.id(), limit);
     }
 
     @GetMapping("/by-sport/{sportId}")
     public List<DiscoveryCandidate> feedBySport(@PathVariable UUID sportId,
-                                                @RequestParam(required = false) Double radiusKm,
                                                 @RequestParam(required = false) Integer limit) {
-        return matching.feedBySport(CurrentUser.id(), sportId, radiusKm, limit);
+        return matching.feedBySport(CurrentUser.id(), sportId, limit);
     }
 }
